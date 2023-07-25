@@ -51,8 +51,8 @@ impl Floor {
             let mut tries = 0;
             while !placed {
                 let pos_loc = Vec2 {
-                    x: fastrand::u32(0..floor_dims.x - room_dims.x - PADDING),
-                    y: fastrand::u32(0..floor_dims.y - room_dims.y - PADDING)
+                    x: fastrand::u32(PADDING..floor_dims.x - room_dims.x - PADDING),
+                    y: fastrand::u32(PADDING..floor_dims.y - room_dims.y - PADDING)
                 };
                 let does_intersect = Floor::room_intersects_existing_rooms(pos_loc, room_dims, &rooms);
                 if !does_intersect {
@@ -84,15 +84,15 @@ impl Floor {
     ) -> bool {
         rooms.iter().any(|other_room| {
             (
-                room_loc.x >= other_room.rel_loc.x - 1
-                && room_loc.x <= other_room.rel_loc.x + other_room.dimensions.x + 1
-                || room_loc.x + room_dims.x >= other_room.rel_loc.x - 1
-                && room_loc.x + room_dims.x <= other_room.rel_loc.x + other_room.dimensions.x + 1
+                room_loc.x >= other_room.rel_loc.x - PADDING
+                && room_loc.x <= other_room.rel_loc.x + other_room.dimensions.x + PADDING
+                || room_loc.x + room_dims.x >= other_room.rel_loc.x - PADDING
+                && room_loc.x + room_dims.x <= other_room.rel_loc.x + other_room.dimensions.x + PADDING
             ) && (
-                room_loc.y >= other_room.rel_loc.y - 1
-                && room_loc.y <= other_room.rel_loc.y + other_room.dimensions.y + 1
-                || room_loc.y + room_dims.y >= other_room.rel_loc.y - 1
-                && room_loc.y + room_dims.y <= other_room.rel_loc.y + other_room.dimensions.y + 1)
+                room_loc.y >= other_room.rel_loc.y - PADDING
+                && room_loc.y <= other_room.rel_loc.y + other_room.dimensions.y + PADDING
+                || room_loc.y + room_dims.y >= other_room.rel_loc.y - PADDING
+                && room_loc.y + room_dims.y <= other_room.rel_loc.y + other_room.dimensions.y + PADDING)
         })
     }
 
