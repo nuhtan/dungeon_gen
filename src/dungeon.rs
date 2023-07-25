@@ -4,8 +4,8 @@ const MAX_TRIES: u32 = 1000;
 const PADDING: u32 = 5;
 
 pub struct Floor {
-    rooms: Vec<Room>,
-    hallways: Vec<Hallway>,
+    rooms: Option<Vec<Room>>,
+    hallways: Option<Vec<Hallway>>,
     dimensions: Vec2,
 }
 
@@ -35,11 +35,19 @@ struct Room {
 }
 
 impl Floor {
-    pub fn gen_floor(
-        floor_dims: Vec2,
+    pub fn init(floor_dims: Vec2) -> Floor {
+        return Floor {
+            dimensions: floor_dims,
+            rooms: None,
+            hallways: None
+        }
+    }
+
+    pub fn gen_rooms(
+        &mut self,
         room_count_range: Range<u32>,
         room_dims_range: Range<u32>
-    ) -> Floor {
+    ) {
         let mut rooms = Vec::new();
         let room_count = fastrand::u32(room_count_range);
         for _ in 0..room_count {
@@ -51,8 +59,8 @@ impl Floor {
             let mut tries = 0;
             while !placed {
                 let pos_loc = Vec2 {
-                    x: fastrand::u32(PADDING..floor_dims.x - room_dims.x - PADDING),
-                    y: fastrand::u32(PADDING..floor_dims.y - room_dims.y - PADDING)
+                    x: fastrand::u32(PADDING..self.dimensions.x - room_dims.x - PADDING),
+                    y: fastrand::u32(PADDING..self.dimensions.y - room_dims.y - PADDING)
                 };
                 let does_intersect = Floor::room_intersects_existing_rooms(pos_loc, room_dims, &rooms);
                 if !does_intersect {
@@ -65,16 +73,12 @@ impl Floor {
                 }
                 tries += 1;
 
-                if tries == 1000 {
+                if tries == MAX_TRIES {
                     break;
                 }
             }
         }
-        return Floor {
-            dimensions: floor_dims,
-            rooms: rooms,
-            hallways: Vec::new()
-        }
+        self.rooms = Some(rooms);
     }
 
     fn room_intersects_existing_rooms(
@@ -100,10 +104,13 @@ impl Floor {
         &self,
         location: Vec2
     ) -> bool {
-        self.rooms.iter().any(|room| {
-            (room.rel_loc.x..room.rel_loc.x + room.dimensions.x).contains(&location.x)
-                && (room.rel_loc.y..room.rel_loc.y + room.dimensions.y).contains(&location.y)
-        })
+        if let Some(available_rooms) = &self.rooms {
+            available_rooms.iter().any(|room| {
+                (room.rel_loc.x..room.rel_loc.x + room.dimensions.x).contains(&location.x)
+            && (room.rel_loc.y..room.rel_loc.y + room.dimensions.y).contains(&location.y)
+            })
+        } else {
+            panic!("Rooms not yet initialized")
+        }
     }
-
 }
