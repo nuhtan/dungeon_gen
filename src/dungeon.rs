@@ -11,8 +11,17 @@ pub struct Floor {
 
 #[derive(Copy, Clone)]
 pub struct Vec2 {
-    x: u32,
-    y: u32,
+    pub x: u32,
+    pub y: u32,
+}
+
+impl Vec2 {
+    pub fn new(x: u32, y: u32) -> Vec2 {
+        return Vec2 {
+            x,
+            y
+        };
+    }
 }
 
 struct Hallway {
@@ -84,6 +93,16 @@ impl Floor {
                 && room_loc.y <= other_room.rel_loc.y + other_room.dimensions.y + 1
                 || room_loc.y + room_dims.y >= other_room.rel_loc.y - 1
                 && room_loc.y + room_dims.y <= other_room.rel_loc.y + other_room.dimensions.y + 1)
+        })
+    }
+
+    pub fn point_within_room(
+        &self,
+        location: Vec2
+    ) -> bool {
+        self.rooms.iter().any(|room| {
+            (room.rel_loc.x..room.rel_loc.x + room.dimensions.x).contains(&location.x)
+                && (room.rel_loc.y..room.rel_loc.y + room.dimensions.y).contains(&location.y)
         })
     }
 
