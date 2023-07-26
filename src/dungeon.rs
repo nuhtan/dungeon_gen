@@ -1,11 +1,15 @@
 use std::ops::Range;
 
+/// The maximum number of tries when attempting to place a new room into a floor.
 const MAX_TRIES: u32 = 1000;
+
+/// The tiles that should pad the edges of the floor and the padding between potential rooms.
 const PADDING: u32 = 5;
 
 pub struct Floor {
-    rooms: Option<Vec<Room>>,
-    hallways: Option<Vec<Hallway>>,
+    pub rooms: Option<Vec<Room>>,
+    _hallways: Option<Vec<Hallway>>,
+    pub connections: Option<Vec<Connection>>,
     dimensions: Vec2,
 }
 
@@ -24,14 +28,19 @@ impl Vec2 {
     }
 }
 
+pub struct Connection {
+    pub starting_room: u32,
+    pub ending_room: u32
+}
+
 struct Hallway {
 
 }
 
-struct Room {
+pub struct Room {
     rel_loc: Vec2,
     dimensions: Vec2,
-    connections: u32,
+    pub index: u32
 }
 
 impl Floor {
@@ -39,7 +48,8 @@ impl Floor {
         return Floor {
             dimensions: floor_dims,
             rooms: None,
-            hallways: None
+            connections: None,
+            _hallways: None
         }
     }
 
@@ -50,13 +60,14 @@ impl Floor {
     ) {
         let mut rooms = Vec::new();
         let room_count = fastrand::u32(room_count_range);
-        for _ in 0..room_count {
+        for index in 0..room_count {
             let room_dims = Vec2 {
                 x: fastrand::u32(room_dims_range.clone()),
                 y: fastrand::u32(room_dims_range.clone()),
             };
             let mut placed = false;
             let mut tries = 0;
+            
             while !placed {
                 let pos_loc = Vec2 {
                     x: fastrand::u32(PADDING..self.dimensions.x - room_dims.x - PADDING),
@@ -67,7 +78,7 @@ impl Floor {
                     rooms.push(Room {
                         dimensions: room_dims,
                         rel_loc: pos_loc,
-                        connections: 0
+                        index
                     });
                     placed = true;
                 }
@@ -76,6 +87,7 @@ impl Floor {
                 if tries == MAX_TRIES {
                     break;
                 }
+                
             }
         }
         self.rooms = Some(rooms);
@@ -111,6 +123,30 @@ impl Floor {
             })
         } else {
             panic!("Rooms not yet initialized")
+        }
+    }
+
+    pub fn gen_connections(
+        &mut self,
+        extra_rooms_range: Range<u32>
+    ) {
+        if let Some(rooms) = &self.rooms {
+            let mut connections = Vec::new();
+            for room_num in 0..(rooms.len() - 1) {
+                let current_room = &rooms[room_num];
+                let next_room = &rooms[room_num + 1];
+                connections.push(Connection {
+                    starting_room: current_room.index,
+                    ending_room: next_room.index
+                });
+                for _ in 0..fastrand::u32(extra_rooms_range.clone()) {
+                    connections.push(Connection {
+                        starting_room: current_room.index,
+                        ending_room: rooms[fastrand::usize(0..rooms.len())].index
+                    });
+                }
+            }
+            self.connections = Some(connections);
         }
     }
 }
