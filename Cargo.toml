@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 fastrand = "2.0.0"
+petgraph = "0.6.3"
