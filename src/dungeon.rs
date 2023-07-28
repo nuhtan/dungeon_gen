@@ -1,4 +1,4 @@
-use std::ops::Range;
+use std::{ops::Range};
 
 /// The maximum number of tries when attempting to place a new room into a floor.
 const MAX_TRIES: u32 = 1000;
@@ -13,7 +13,7 @@ pub struct Floor {
     dimensions: Vec2,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Vec2 {
     pub x: u32,
     pub y: u32,
@@ -33,8 +33,23 @@ pub struct Connection {
     pub ending_room: u32
 }
 
-struct Hallway {
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right
+}
 
+struct Segment {
+    initial_location: Vec2,
+    length: u32,
+    direction: Direction
+}
+
+struct Hallway {
+    starting_point: Vec2,
+    ending_point: Vec2,
+    segments: Vec<Segment>
 }
 
 pub struct Room {
@@ -147,6 +162,39 @@ impl Floor {
                 }
             }
             self.connections = Some(connections);
+        }
+    }
+
+    fn hallway_intersects_room(
+        &self,
+        starting_point: Vec2,
+        target_point: Vec2,
+    ) -> Option<Vec2> {
+        unimplemented!("None or point that should be used for additional segment")
+    }
+
+    fn get_room_adjacent_tile(&self, room: &Room) -> Vec2 {
+        unimplemented!("Not yet")
+    }
+
+    pub fn gen_hallways(
+        &mut self
+    ) {
+        if let Some(rooms) = &self.rooms {
+            if let Some(connections) = &self.connections {
+                for connection in connections {
+                    let start_point = self.get_room_adjacent_tile(&rooms[connection.starting_room as usize]);
+                    let end_point = self.get_room_adjacent_tile(&rooms[connection.ending_room as usize]);
+                    let current_point = start_point;
+                    while current_point != end_point {
+                        if i32::abs(current_point.x as i32 - end_point.x as i32) > i32::abs(current_point.y as i32 - end_point.y as i32) {
+                             
+                         } else {
+                            
+                        }
+                    }
+                }
+            }
         }
     }
 }
